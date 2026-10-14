@@ -1,0 +1,13 @@
+# Dependências e arquivos gerados
+node_modules/
+dist/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+
+# Configuração local e logs
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store

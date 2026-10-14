@@ -1,0 +1,24 @@
+{
+  "name": "code-connect",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@12.11.2",
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./apps/* run dev",
+    "dev:web": "pnpm --filter ./apps/web dev",
+    "dev:api": "pnpm --filter ./apps/api dev",
+    "build": "pnpm -r run build",
+    "build:web": "pnpm --filter ./apps/web build",
+    "build:api": "pnpm --filter ./apps/api build",
+    "lint": "pnpm -r run lint",
+    "lint:web": "pnpm --filter ./apps/web lint",
+    "lint:api": "pnpm --filter ./apps/api lint",
+    "preview:web": "pnpm --filter ./apps/web preview",
+    "start:api": "pnpm --filter ./apps/api start:prod",
+    "test:api": "pnpm --filter ./apps/api test",
+    "test:e2e:api": "pnpm --filter ./apps/api test:e2e",
+    "web": "pnpm --filter ./apps/web",
+    "api": "pnpm --filter ./apps/api",
+    "test:web": "pnpm --filter ./apps/web test"
+  }
+}

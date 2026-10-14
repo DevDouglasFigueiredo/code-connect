@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-page: #0e1010;
+  --color-surface: #171d1f;
+  --color-content: #e1e1e1;
+  --color-muted: #a4a7a7;
+  --color-field: #999b9b;
+  --color-accent: #00ed82;
+  --font-sans: 'Arial', sans-serif;
+}
+
+@layer base {
+  body { margin: 0; min-width: 320px; background: var(--color-page); color: var(--color-content); }
+  button, a, input { -webkit-tap-highlight-color: transparent; }
+  button, a { touch-action: manipulation; }
+  button:not(:disabled), input[type='checkbox'] { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+}
