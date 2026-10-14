@@ -20,15 +20,15 @@ export function LoginForm({ onSubmit, onForgotPassword }: {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" aria-label="Login">
-      <FormField label="Email ou usuário" name="identifier" autoComplete="username" required pattern=".*\S.*" title="Informe seu email ou usuário" value={identifier} onChange={(event) => setIdentifier(event.target.value)} />
+      <FormField label="Email ou usuário" name="identifier" placeholder="usuario123" autoComplete="username" required pattern=".*\S.*" title="Informe seu email ou usuário" value={identifier} onChange={(event) => setIdentifier(event.target.value)} />
       <div className="space-y-2">
-        <FormField label="Senha" name="password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} />
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <label className="flex cursor-pointer items-center gap-1.5 text-muted"><input type="checkbox" name="rememberMe" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="size-4 accent-accent" />Lembrar-me</label>
+        <FormField label="Senha" name="password" type="password" placeholder="******" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} />
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <label className="flex cursor-pointer items-center gap-2 text-muted"><input type="checkbox" name="rememberMe" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="size-6 accent-accent" />Lembrar-me</label>
           <button type="button" onClick={onForgotPassword} className="underline underline-offset-2 hover:text-accent">Esqueci a senha</button>
         </div>
       </div>
-      <div className="pt-3"><Button type="submit">Login <Icon name="arrow" className="size-4" /></Button></div>
+      <div className="pt-4"><Button type="submit">Login <Icon name="arrow" className="size-6" /></Button></div>
     </form>
   );
 }

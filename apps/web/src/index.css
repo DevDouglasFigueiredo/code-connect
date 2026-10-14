@@ -1,13 +1,25 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-page: #0e1010;
-  --color-surface: #171d1f;
-  --color-content: #e1e1e1;
-  --color-muted: #a4a7a7;
-  --color-field: #999b9b;
-  --color-accent: #00ed82;
-  --font-sans: 'Arial', sans-serif;
+  --color-graphite: #00090e;
+  --color-dark-gray: #171d1f;
+  --color-offwhite: #e1e1e1;
+  --color-medium-gray: #888888;
+  --color-highlight-green: #81fe88;
+  --color-petroleum: #132e35;
+  --color-google-blue: #4285f4;
+  --color-google-green: #34a853;
+  --color-google-yellow: #fbbc05;
+  --color-google-red: #ea4335;
+
+  --color-page: var(--color-graphite);
+  --color-surface: var(--color-dark-gray);
+  --color-content: var(--color-offwhite);
+  --color-muted: var(--color-medium-gray);
+  --color-field: var(--color-medium-gray);
+  --color-accent: var(--color-highlight-green);
+  --color-button-content: var(--color-petroleum);
+  --font-sans: 'Prompt', sans-serif;
 }
 
 @layer base {
@@ -15,5 +27,27 @@
   button, a, input { -webkit-tap-highlight-color: transparent; }
   button, a { touch-action: manipulation; }
   button:not(:disabled), input[type='checkbox'] { cursor: pointer; }
+  input[type='checkbox'] {
+    appearance: none;
+    flex-shrink: 0;
+    border: 2px solid var(--color-muted);
+    border-radius: 4px;
+    background-color: transparent;
+    display: grid;
+    place-content: center;
+  }
+  input[type='checkbox']::before {
+    content: '';
+    width: 6px;
+    height: 12px;
+    border-right: 2px solid var(--color-accent);
+    border-bottom: 2px solid var(--color-accent);
+    transform: translateY(-2px) rotate(45deg);
+    visibility: hidden;
+  }
+  input[type='checkbox']:checked::before { visibility: visible; }
+  @media (forced-colors: active) {
+    input[type='checkbox'] { appearance: auto; }
+  }
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
 }

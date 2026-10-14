@@ -38,7 +38,10 @@ The API uses Jest, ts-jest, NestJS testing utilities, and Supertest. Name unit t
 
 Use Atomic Design under `apps/web/src/components/`: `atoms/` for primitives, `molecules/` for small compositions, `organisms/` for larger sections, and `templates/` for page layouts. Keep concrete screens in `apps/web/src/pages/`. Compose higher layers from lower layers; lower layers must not import higher layers. Keep atoms reusable and independent of page-specific business logic.
 
-Use Tailwind CSS utilities for component styling and shared design tokens for consistent colors, spacing, and typography. Tailwind is required for new UI work but is not installed yet; configure it before introducing utility classes.
+Use Tailwind CSS utilities for component styling and shared design tokens for consistent colors, spacing, and typography. Tailwind CSS v4 is configured through the Vite plugin; extend its theme with `@theme` in `apps/web/src/index.css`.
+
+- **Font sizes:** use the closest size from Tailwind's standard scale, such as `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, and `text-3xl`. Do not use arbitrary font sizes such as `text-[18px]` or add custom size tokens solely to match a Figma measurement. For example, use `text-lg` for 18 px and `text-3xl` for 31 px.
+- **Colors:** define project palette values only in `@theme` using `--color-*` tokens. Reuse semantic aliases such as `page`, `surface`, `content`, `muted`, `field`, `accent`, and `button-content` in component classes (`bg-surface`, `text-content`, `border-accent`). Do not hardcode hexadecimal colors in utility classes, inline styles, SVG attributes, or CSS outside the palette. Use themed utilities such as `fill-google-blue` for brand icons and `var(--color-accent)` in shared CSS. Add any new palette color to the theme before using it.
 
 ## REST Principles
 

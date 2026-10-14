@@ -1,6 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { resolve } from 'node:path';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { validateConfiguration } from './configuration';
 
-@Module({ controllers: [AppController], providers: [AppService] })
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: resolve(__dirname, '../.env'),
+      validate: validateConfiguration,
+    }),
+    UsersModule,
+    AuthModule,
+  ],
+})
 export class AppModule {}
