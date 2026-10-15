@@ -3,24 +3,27 @@ import { Button } from '../atoms/Button';
 import { Icon } from '../atoms/Icon';
 import { FormField } from '../molecules/FormField';
 
-export type LoginCredentials = { identifier: string; password: string; rememberMe: boolean };
+export type LoginCredentials = { email: string; password: string; rememberMe: boolean };
 
-export function LoginForm({ onSubmit, onForgotPassword }: {
+export function LoginForm({ onSubmit, onForgotPassword, isSubmitting = false, initialEmail = '', initialRememberMe = true }: {
   onSubmit: (credentials: LoginCredentials) => void;
   onForgotPassword: () => void;
+  isSubmitting?: boolean;
+  initialEmail?: string;
+  initialRememberMe?: boolean;
 }) {
-  const [identifier, setIdentifier] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(initialRememberMe);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onSubmit({ identifier: identifier.trim(), password, rememberMe });
+    if (!isSubmitting) onSubmit({ email: email.trim().toLowerCase(), password, rememberMe });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" aria-label="Login">
-      <FormField label="Email ou usuário" name="identifier" placeholder="usuario123" autoComplete="username" required pattern=".*\S.*" title="Informe seu email ou usuário" value={identifier} onChange={(event) => setIdentifier(event.target.value)} />
+    <form aria-busy={isSubmitting} onSubmit={handleSubmit} className="space-y-4" aria-label="Login">
+      <FormField label="Email" name="email" type="email" placeholder="Digite seu email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} />
       <div className="space-y-2">
         <FormField label="Senha" name="password" type="password" placeholder="******" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} />
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -28,7 +31,7 @@ export function LoginForm({ onSubmit, onForgotPassword }: {
           <button type="button" onClick={onForgotPassword} className="underline underline-offset-2 hover:text-accent">Esqueci a senha</button>
         </div>
       </div>
-      <div className="pt-4"><Button type="submit">Login <Icon name="arrow" className="size-6" /></Button></div>
+      <div className="pt-4"><Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Entrando…' : 'Login'} <Icon name="arrow" className="size-6" /></Button></div>
     </form>
   );
 }

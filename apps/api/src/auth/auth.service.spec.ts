@@ -4,13 +4,17 @@ import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   const jwt = new JwtService({ secret: 'unit-test-secret', signOptions: { expiresIn: 3600, algorithm: 'HS256' } });
-  const users = new UsersService();
-  const auth = new AuthService(users, jwt);
+  const users = { verifyCredentials: jest.fn() };
+  const auth = new AuthService(users as unknown as UsersService, jwt);
+
+  beforeEach(() => jest.resetAllMocks());
 
   it('issues a one-hour JWT identifying the user without sensitive fields', async () => {
-    const input = { name: 'Ana', email: 'ana@example.com', password: 'password123' };
-    const user = await users.create(input);
+    const user = { id: 'test-user-id', name: 'Ana', email: 'ana@example.com' };
+    users.verifyCredentials.mockResolvedValue(user);
+    const input = { email: user.email, password: 'password123' };
     const token = await auth.login(input);
+    expect(users.verifyCredentials).toHaveBeenCalledWith(input.email, input.password);
     const payload = await jwt.verifyAsync<{ sub: string; iat: number; exp: number }>(token.access_token);
     expect(payload.sub).toBe(user.id);
     expect(payload.exp - payload.iat).toBe(3600);
@@ -19,6 +23,7 @@ describe('AuthService', () => {
   });
 
   it('returns the same error for a wrong password and a missing account', async () => {
+    users.verifyCredentials.mockResolvedValue(undefined);
     await expect(auth.login({ email: 'ana@example.com', password: 'wrong' })).rejects.toThrow('Invalid email or password');
     await expect(auth.login({ email: 'missing@example.com', password: 'wrong' })).rejects.toThrow('Invalid email or password');
   });

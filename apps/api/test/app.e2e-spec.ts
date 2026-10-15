@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
 import * as request from 'supertest';
+import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/configure-app';
 import { UsersService } from '../src/users/users.service';
@@ -18,13 +19,36 @@ describe('Authentication API (e2e)', () => {
   const jwt = new JwtService({ secret: process.env.JWT_SECRET, signOptions: { algorithm: 'HS256', expiresIn: 3600 } });
   const server = (): Parameters<typeof request>[0] => app.getHttpServer() as Parameters<typeof request>[0];
 
-  beforeAll(async () => {
+  async function startApp(): Promise<void> {
     const module = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = module.createNestApplication();
     configureApp(app);
     await app.init();
+  }
+
+  function testDatabase(): DataSource {
+    const database = app.get(DataSource);
+    const options = database.options;
+    if (options.type !== 'mysql' || options.database !== 'code_connect_test' ||
+        options.host !== '127.0.0.1' || options.port !== 3307 || options.username !== 'code_connect_test') {
+      throw new Error('Refusing to modify a database outside the isolated e2e service');
+    }
+    return database;
+  }
+
+  beforeAll(async () => {
+    await startApp();
+    const database = testDatabase();
+    await database.runMigrations();
+    await database.query('DELETE FROM users');
   });
-  afterAll(async () => { await app?.close(); });
+  afterAll(async () => {
+    try {
+      if (app?.get(DataSource).isInitialized) await testDatabase().query('DELETE FROM users');
+    } finally {
+      await app?.close();
+    }
+  });
 
   it('registers a normalized user without credentials and points to login', async () => {
     const response = await request(server()).post('/users').send(input).expect(201)
@@ -88,6 +112,23 @@ describe('Authentication API (e2e)', () => {
     expect(response.body).toEqual({ data: user, links: { self: '/users/me' } });
   });
 
+  it('persists users and accepts login and the existing JWT after application restart', async () => {
+    const originalToken = token;
+    await app.close();
+    await startApp();
+    const profile = await request(server()).get('/users/me').auth(originalToken, { type: 'bearer' }).expect(200);
+    expect((profile.body as UserResponse).data).toEqual(user);
+    const response = await request(server()).post('/sessions')
+      .send({ email: input.email, password: input.password }).expect(200);
+    const nextToken = (response.body as TokenResponse).data.access_token;
+    const nextProfile = await request(server()).get('/users/me').auth(nextToken, { type: 'bearer' }).expect(200);
+    expect((nextProfile.body as UserResponse).data).toEqual(user);
+    const [stored] = await testDatabase().query('SELECT salt, passwordHash FROM users WHERE id = ?', [user.id]) as { salt: string; passwordHash: Buffer }[];
+    expect(stored.salt).toHaveLength(32);
+    expect(Buffer.isBuffer(stored.passwordHash)).toBe(true);
+    expect(stored.passwordHash).toHaveLength(64);
+  });
+
   it('hides unexpected internal failures', async () => {
     const lookup = jest.spyOn(app.get(UsersService), 'findById').mockImplementationOnce(() => {
       throw new Error('Private internal failure');
@@ -134,6 +175,28 @@ describe('Authentication API (e2e)', () => {
   ])('supports OPTIONS discovery on %s', async (path, methods) => {
     const response = await request(server()).options(path).expect(204).expect('Allow', methods);
     expect(response.text).toBe('');
+  });
+
+  it('permits the configured frontend origin and authorization preflight', async () => {
+    await request(server()).options('/users/me')
+      .set('Origin', 'http://localhost:5173')
+      .set('Access-Control-Request-Method', 'GET')
+      .set('Access-Control-Request-Headers', 'authorization')
+      .expect(204).expect('Allow', 'GET, HEAD, OPTIONS')
+      .expect('Cache-Control', 'no-store')
+      .expect('Access-Control-Allow-Origin', 'http://localhost:5173')
+      .expect('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    await request(server()).post('/sessions')
+      .set('Origin', 'http://localhost:5173')
+      .send({ email: input.email, password: input.password })
+      .expect(200).expect('Access-Control-Allow-Origin', 'http://localhost:5173');
+  });
+
+  it('does not allow an unconfigured frontend origin', async () => {
+    const response = await request(server()).options('/users/me')
+      .set('Origin', 'https://untrusted.example')
+      .set('Access-Control-Request-Method', 'GET').expect(204);
+    expect(response.headers['access-control-allow-origin']).toBeUndefined();
   });
 
   it('removes the scaffold route', async () => {

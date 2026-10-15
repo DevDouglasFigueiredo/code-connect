@@ -16,6 +16,13 @@ export function configureApp(app: INestApplication): void {
     '/sessions': 'POST, OPTIONS',
     '/users/me': 'GET, HEAD, OPTIONS',
   };
+  app.enableCors({
+    origin: (process.env.CORS_ORIGINS ?? 'http://localhost:5173').split(',').map((origin) => origin.trim()).filter(Boolean),
+    methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Location'],
+    preflightContinue: true,
+  });
   app.use((request: { method: string; path: string }, response: {
     setHeader(name: string, value: string): void;
     status(code: number): { end(): void };
@@ -38,7 +45,7 @@ export function configureApp(app: INestApplication): void {
   app.useGlobalFilters(new HttpExceptionFilter());
   const config = new DocumentBuilder()
     .setTitle('Code Connect API')
-    .setDescription('In-memory registration and JWT authentication. Users are lost on restart. Sign in and paste the access_token into Authorize.')
+    .setDescription('MySQL-backed registration and JWT authentication. Sign in and paste the access_token into Authorize.')
     .setVersion('1.0.0')
     .addBearerAuth()
     .build();

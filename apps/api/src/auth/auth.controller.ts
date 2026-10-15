@@ -29,8 +29,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Get the authenticated user' })
   @ApiOkResponse({ type: UserResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid token or user no longer exists', type: ErrorResponseDto })
-  me(@Req() request: AuthenticatedRequest): UserResponseDto {
-    const user = this.usersService.findById(request.user.sub);
+  async me(@Req() request: AuthenticatedRequest): Promise<UserResponseDto> {
+    const user = await this.usersService.findById(request.user.sub);
     if (!user) throw new UnauthorizedException('Invalid or missing token');
     return { data: user, links: { self: '/users/me' } };
   }

@@ -33,3 +33,10 @@ it.each([
   await userEvent.click(screen.getByRole('button', { name: 'Cadastrar' }));
   expect(onSubmit).not.toHaveBeenCalled();
 });
+
+it('enforces password limits and disables pending submissions', () => {
+  render(<RegistrationForm onSubmit={vi.fn()} isSubmitting />);
+  expect(screen.getByLabelText('Senha')).toHaveAttribute('minlength', '8');
+  expect(screen.getByLabelText('Senha')).toHaveAttribute('maxlength', '128');
+  expect(screen.getByRole('button', { name: 'Cadastrando…' })).toBeDisabled();
+});
