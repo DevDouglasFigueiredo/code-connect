@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { isUUID } from 'class-validator';
+import { UsersService } from '../users/users.service';
 
 export interface AuthenticatedRequest {
   headers: { authorization?: string };
@@ -9,7 +10,7 @@ export interface AuthenticatedRequest {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService, private readonly usersService: UsersService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -24,6 +25,16 @@ export class AuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException('Invalid or missing token');
     }
+    if (!await this.usersService.findById(request.user.sub)) throw new UnauthorizedException('Invalid or missing token');
     return true;
+  }
+}
+
+@Injectable()
+export class OptionalAuthGuard extends AuthGuard {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    if (request.headers.authorization === undefined) return true;
+    return super.canActivate(context);
   }
 }

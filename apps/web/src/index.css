@@ -5,6 +5,9 @@
   --color-dark-gray: #171d1f;
   --color-offwhite: #e1e1e1;
   --color-medium-gray: #888888;
+  --color-light-gray: #bcbcbc;
+  --color-white: #ffffff;
+  --color-shadow: #000000;
   --color-highlight-green: #81fe88;
   --color-petroleum: #132e35;
   --color-google-blue: #4285f4;
@@ -16,6 +19,8 @@
   --color-surface: var(--color-dark-gray);
   --color-content: var(--color-offwhite);
   --color-muted: var(--color-medium-gray);
+  --color-secondary: var(--color-light-gray);
+  --color-navigation-active: var(--color-white);
   --color-field: var(--color-medium-gray);
   --color-accent: var(--color-highlight-green);
   --color-button-content: var(--color-petroleum);
@@ -24,7 +29,7 @@
 
 @layer base {
   body { margin: 0; min-width: 320px; background: var(--color-page); color: var(--color-content); }
-  button, a, input { -webkit-tap-highlight-color: transparent; }
+  button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
   button, a { touch-action: manipulation; }
   button:not(:disabled), input[type='checkbox'] { cursor: pointer; }
   input[type='checkbox'] {
@@ -50,4 +55,8 @@
     input[type='checkbox'] { appearance: auto; }
   }
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+}
+
+@utility shadow-editor {
+  box-shadow: 0 16px 24px color-mix(in srgb, var(--color-shadow) 24%, transparent);
 }

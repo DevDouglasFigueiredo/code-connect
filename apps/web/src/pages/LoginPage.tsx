@@ -8,7 +8,7 @@ import { AuthTemplate } from '../components/templates/AuthTemplate';
 import { useAuth } from '../auth/auth-context';
 import { errorMessage } from '../services/http';
 
-type RegistrationNotice = { registered?: boolean; email?: string; rememberMe?: boolean };
+type RegistrationNotice = { from?: string; registered?: boolean; email?: string; rememberMe?: boolean };
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -40,7 +40,7 @@ export function LoginPage() {
       banner={<AuthBanner src="/auth/login.png" variant="login" alt="Desenvolvedora em um ambiente tecnológico iluminado em verde, com a marca Code Connect" />}
       footer={<div className="space-y-6">
         <SocialLogin onSelect={(provider) => setNotice(`O login com ${provider === 'github' ? 'GitHub' : 'Google'} estará disponível em breve.`)} />
-        <div className="space-y-2 text-center text-sm"><p>Ainda não tem conta?</p><Link to="/cadastro" className="inline-flex items-center gap-3 text-lg text-accent hover:underline">Crie seu cadastro! <Icon name="registration" className="size-6" /></Link></div>
+        <div className="space-y-2 text-center text-sm"><p>Ainda não tem conta?</p><Link to="/cadastro" state={{ from: state?.from }} className="inline-flex items-center gap-3 text-lg text-accent hover:underline">Crie seu cadastro! <Icon name="registration" className="size-6" /></Link></div>
       </div>}
     >
       <LoginForm onSubmit={handleSubmit} isSubmitting={isSubmitting} initialEmail={state?.email} initialRememberMe={state?.rememberMe} onForgotPassword={() => setNotice('A recuperação de senha estará disponível em breve.')} />

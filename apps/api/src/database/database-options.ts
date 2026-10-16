@@ -1,5 +1,8 @@
 import { join } from 'node:path';
 import { type DataSourceOptions } from 'typeorm';
+import { Post } from '../posts/post.entity';
+import { PostLike } from '../posts/like.entity';
+import { PostComment } from '../posts/comment.entity';
 import { User } from '../users/user.entity';
 
 export function validateDatabaseConfiguration(config: Record<string, unknown>): Record<string, unknown> {
@@ -25,7 +28,7 @@ export function databaseOptions(config: Record<string, unknown>): DataSourceOpti
     password: validated.DB_PASSWORD as string,
     database: validated.DB_NAME as string,
     charset: 'utf8mb4_bin',
-    entities: [User],
+    entities: [User, Post, PostLike, PostComment],
     migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
     synchronize: false,
     migrationsRun: false,

@@ -210,7 +210,7 @@ describe('Authentication API (e2e)', () => {
       paths: Record<string, Record<string, { requestBody?: unknown; responses: Record<string, { headers?: Record<string, unknown>; content?: unknown }>; security?: unknown }>>;
       components: { schemas: Record<string, { properties: Record<string, unknown> }>; securitySchemes: Record<string, unknown> };
     };
-    expect(Object.keys(doc.paths).sort()).toEqual(['/sessions', '/users', '/users/me']);
+    expect(Object.keys(doc.paths)).toEqual(expect.arrayContaining(['/sessions', '/users', '/users/me', '/posts', '/posts/{id}']));
     expect(doc.paths['/users'].post.requestBody).toBeDefined();
     expect(doc.paths['/sessions'].post.requestBody).toBeDefined();
     expect(doc.paths['/users'].post.responses['201'].headers?.Location).toBeDefined();

@@ -1,0 +1,32 @@
+import { LocationObserver } from '../test/LocationObserver';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { expect, it } from 'vitest';
+import { renderCommunity } from '../test/render-community';
+import { collection, post } from '../test/posts';
+import { mockApi, respond } from '../test/http-adapter';
+import { FeedPage } from './FeedPage';
+it('requests server search, ordering and pagination while keeping URL state', async () => {
+  const adapter = mockApi();
+  adapter.mockImplementation(async (config) => respond(config, collection([post], Number(config.params.page), 12)));
+  renderCommunity(<><FeedPage /><LocationObserver /></>, {}, '/?q=React');
+  await screen.findByRole('link', { name: post.title });
+  expect(adapter.mock.calls[0][0].params).toEqual({ q: 'React', page: 1, limit: 6, sort: 'recent' });
+  await userEvent.click(screen.getByRole('button', { name: 'Mais curtidos' }));
+  await waitFor(() => expect(adapter.mock.lastCall?.[0].params.sort).toBe('likes'));
+  await screen.findByRole('button', { name: 'Próxima' });
+  await userEvent.click(screen.getByRole('button', { name: 'Próxima' }));
+  await waitFor(() => expect(adapter.mock.lastCall?.[0].params.page).toBe(2));
+  expect(screen.getByTestId('location')).toHaveTextContent('page=2');
+  await userEvent.clear(screen.getByRole('searchbox'));
+  await userEvent.type(screen.getByRole('searchbox'), 'CSS{enter}');
+  await waitFor(() => expect(adapter.mock.lastCall?.[0].params).toMatchObject({ q: 'CSS', page: 1 }));
+});
+it('offers retry for connection failures and shows empty results', async () => {
+  const adapter = mockApi(); adapter.mockRejectedValueOnce(new Error('offline'));
+  renderCommunity(<FeedPage />);
+  expect(await screen.findByRole('alert')).toBeInTheDocument();
+  adapter.mockImplementation(async (config) => respond(config, collection([])));
+  await userEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+  expect(await screen.findByRole('status')).toHaveTextContent('Nenhum post');
+});

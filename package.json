@@ -24,6 +24,7 @@
     "db:migration:run": "pnpm --filter ./apps/api db:migration:run",
     "db:migration:revert": "pnpm --filter ./apps/api db:migration:revert",
     "db:migration:show": "pnpm --filter ./apps/api db:migration:show",
-    "db:migration:run:prod": "pnpm --filter ./apps/api db:migration:run:prod"
+    "db:migration:run:prod": "pnpm --filter ./apps/api db:migration:run:prod",
+    "db:seed": "pnpm --filter ./apps/api db:seed"
   }
 }
